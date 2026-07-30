@@ -1,0 +1,22 @@
+# --- OS가 만드는 잡파일 ---
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# --- 개인 AI 도구가 만드는 로컬 산출물 (사람마다 다름 — 커밋 금지) ---
+# Claude Code
+.gstack/
+.omc/
+.claude/settings.local.json
+
+# OpenAI Codex
+.codex/
+
+# --- 에디터 설정 ---
+.idea/
+.vscode/
+*.swp
+
+# --- env ---
+.env
