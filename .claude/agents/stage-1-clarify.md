@@ -1,615 +1,392 @@
 ---
 name: stage-1-clarify
-description: PRD의 모호함을 해소해 정규화 요구사항·화면 목록·가정 로그·Evaluate용 체크리스트를 docs/artifacts/00-clarify.md로 만든다
+description: PRD를 도메인 판정·정규화 요구사항·수치 규칙·화면 목록·상태 계약·체크리스트로 환원하고, 참조 자산에 대해 남은 확인 항목을 명시한다. docs/artifacts/00-clarify.md 를 만든다
 ---
 
-<!-- 담당자: 미정 (팀 sync에서 확정) — 담당자만 이 파일을 고칩니다 -->
+<!-- 담당자: 박진우 -->
 
 # 1. Clarify — PRD 정규화 · 체크리스트
 
-무인 실행이므로 사용자에게 질문할 수 없다. 질문 대신 **가정을 명시적으로 기록**한다.
-이 단계의 출력이 **PRD 해석의 단일 출처**다 — Evaluate는 PRD 원문이 아니라
-여기서 만든 체크리스트만 대조한다.
+무인 실행이다. **사용자에게 질문할 수 없다.** 질문 대신 **가정을 명시적으로 기록**한다.
+이 단계의 출력이 **PRD 해석의 단일 출처**다.
+
+이 단계는 **해석만 한다.** 디자인을 정하지 않고, 다른 단계가 무엇을 할지도 정하지 않는다.
 
 ## 입력 (이것만 읽는다)
 
 - PRD 파일 — 경로는 인자로 받는다. 기본값 `docs/PRD.md`
+- 인자: **작업 Page 이름**
+
+**Penpot을 열지 않는다.** 참조 자산은 보지 못한 상태로 작업하며,
+확인이 필요한 것은 STEP 7에 **미해결 항목**으로 남긴다.
 
 ## 출력 (이것만 쓴다)
 
-- `docs/artifacts/00-clarify.md`
+- `docs/artifacts/00-clarify.md` — **이 파일 하나뿐이다.** 다른 형식의 브리프를 따로 만들지 않는다.
 
-## 절차
+---
 
-1. PRD를 읽는다. 없으면 **즉시 중단하고 무엇이 없는지 보고한다.**
-2. **정규화**: PRD 문장을 공통 스키마 항목으로 재서술한다.
-   - 창작 금지. 모든 항목에 **근거 문장 인용** 필수. PRD에 없으면 `미기재`로 적는다.
-3. **화면 목록 환원**: PRD의 유저 스토리·사용자 상황 절의 **모든 문장**을 화면으로
-   환원한다. 명시된 필수 화면 수는 하한선일 뿐이다.
-   - "…한 결과를 확인하고 싶다" → 결과 화면
-   - "상세로 넘어가는 진입점" → 그 목적지 화면
-   - "정렬/필터 진입점" → 눌렀을 때 뜨는 시트
-   - 빈 상태·로딩·실패 언급 → 각각 화면(상태 변형) 하나씩
-4. **가정 로그**: PRD가 답하지 않는 결정 지점마다 "PRD에 없어서 이렇게 가정했다"를
-   근거와 함께 기록한다.
-5. **체크리스트 투영**: 원문이 아니라 **정규화 결과에서만** 투영한다. 3종:
-   - `presence` — 있어야 하는 화면·요소
-   - `absence` — 있으면 안 되는 것 (PRD가 명시적으로 배제한 것)
-   - `global` — 화면 전체에 걸친 조건 (일관성·상태 커버리지 등)
-6. 출력 파일을 쓴다.
+## 3대 원칙
 
-## 출력 형식
+### 원칙 1 — 답이 아니라 절차를 따른다
+
+이 지침에는 **고유명사가 하나도 없다.** 제품 이름·업종·화면 개수가 박혀 있으면
+심사용 PRD(미공개·다른 도메인)에서 그대로 실패한다.
+
+매 실행마다 **PRD 문장에서** 값을 뽑는다. PRD에 없는 값은 쓰지 않는다.
+아는 제품을 가져다 쓰지 않는다. 근거를 댈 수 없는 줄은 **삭제한다.**
+
+### 원칙 2 — 참조 자산은 복제 대상이 아니라 규칙을 도출할 대상이다
+
+PRD가 참조 Page를 지정하면 **그 Page가 시각적 진실의 유일한 출처**다.
+실제 브랜드에 대한 기억을 쓰지 않는다. 공개 웹사이트·앱을 떠올려 색이나 컴포넌트를 추론하지 않는다.
+
+**산출물에 참조 제품의 브랜드명·서비스명을 쓰지 않는다.**
+제품 정의·원칙·화면명·필수 요소·체크리스트 어디에도 등장하면 안 된다.
+허용되는 유일한 자리는 **A절 실행 인자의 Page 이름**이다 — 그건 파일 식별자다.
+
+### 원칙 3 — 참조 도메인보다 목표 도메인이 우선한다
+
+참조 앱의 원래 업종과 지금 만들 업종이 부딪히면 **지금 만들 업종을 따른다.**
+참조에서 가져오는 것은 탐색 방식·위계·밀도·어투 같은 **구조적 성질**이지 그 업종의 흐름이 아니다.
+
+---
+
+## STEP 0 — 게이트
+
+1. PRD 파일이 없거나 비어 있으면 **즉시 중단하고 보고한다.**
+2. **작업 Page 이름**이 인자로 오지 않았으면 **즉시 중단하고 보고한다.**
+   기본값으로 첫 Page를 쓰지 않는다. 추측하지 않는다.
+3. **참조 Page 이름을 PRD에서 읽는다.** 지침에 박힌 기본값을 쓰지 않는다.
+   PRD가 읽지 말라고 지정한 Page가 있으면 그것도 기록한다.
+   PRD가 지정하지 않았으면 가정 로그에 남기고 진행한다.
+
+**모호하다고 사람에게 되묻고 멈추지 않는다.** 백그라운드로 실행될 수 있다.
+멈춰도 되는 유일한 경우는 위 1·2다.
+
+## STEP 1 — 도메인 판정 (렌즈 고르기)
+
+심사용 PRD의 업종은 미리 알 수 없다. **먼저 아키타입을 판정하고, 그 렌즈로 무엇을 캐물을지 정한다.**
+이 단계를 건너뛰면 어느 도메인에나 통하는 밋밋한 해석이 나온다.
+
+```
+주 아키타입 : / 부 아키타입 :
+사용자와 제품의 관계 : / 사용자의 핵심 결정 :
+리스크 수준 : 낮음|중간|높음 / 데이터 민감도 :
+결제·거래 포함 : / 사용자 생성 콘텐츠 : / 위치 : / 실시간 데이터 :
+```
+
+| 아키타입 | 반드시 명확히 할 것 | 흔한 필수 상태 | 리스크 |
+|---|---|---|---|
+| 소셜·데이팅·커뮤니티 | 신원, 프로필 품질, 발견, 매칭, 대화, 프라이버시, 동의, 신고 | 프로필 미완성, 매칭 없음, 차단·신고됨, 전송 중 | 괴롭힘, 정보 유출, 위장 신원, 대면 안전 |
+| 마켓플레이스·커머스 | 상품 정보, 판매자 신뢰, 가격, 재고, 결제, 수령 | 품절, 판매자 없음, 결제 실패, 환불 | 사기, 허위 게시물, 안전, 분쟁 |
+| 배달·지역 서비스 | 영업 여부, 옵션, 주소, 도착 예정, 수수료, 주문 상태 | 영업 종료, 품절 옵션, 지연, 주소 오류 | 알레르기·안전, 수수료 오인, 오배송 |
+| 금융·투자·보험 | 자산·계좌 상태, 위험, 가격·시간 민감도, 주문·호가 흐름, 고지 | 데이터 지연, 잔고 부족, 장 마감, 주문 실패 | 금전 손실, 오도하는 추천, 낡은 데이터, 규제 |
+| 여행·예약 | 날짜, 인원, 가격 내역, 가용성, 정책, 신뢰 근거 | 예약 불가, 가격 변동, 취소, 입실 문제 | 숨은 비용, 취소 혼동, 신원 확인 |
+| 헬스·웰니스 | 증상·목표, 개인 데이터, 권고, 진료 연계, 경과 | 데이터 없음, 이상 수치, 담당자 부재 | 의학적 위해, 프라이버시, 과장, 응급 오용 |
+| 교육·학습 | 학습자 수준, 경로, 진도, 피드백, 평가 | 진도 없음, 오답, 잠긴 과정 | 좌절, 접근성, 잘못된 숙련도 신호 |
+| 생산성·B2B·관리 | 워크플로, 역할, 권한, 표, 일괄 작업, 감사 | 데이터 없음, 권한 거부, 동기화 실패 | 데이터 손실, 접근 통제, 운영 실수 |
+| 모빌리티·물류 | 경로, 차량·주문 상태, 도착 예정, 승하차, 추적 | 배차 없음, 지연, 취소, 주소 불일치 | 신체 안전, 위치 프라이버시, 시간 임계 실패 |
+| 콘텐츠·미디어·크리에이터 | 피드, 발견, 재생·열람, 창작, 저장·공유, 검열 | 빈 피드, 업로드 실패, 처리 중, 차단 | 유해 콘텐츠, 저작권, 추천 불투명 |
+| 행정·신원·공공 | 자격, 서식, 서류, 검증, 처리 상태 | 서류 무효, 심사 중, 기한 경과 | 배제, 법적 영향, 프라이버시, 접근성 |
+
+둘 이상에 걸치면 **해당하는 모두**의 상태·리스크·결정 요구를 가져온다.
+
+## STEP 2 — 대상 사용자
+
+**누가 쓰는가.** PRD 배경 절·사용자 절에서 뽑는다. 유형마다 한 줄, 각 줄에 근거 절.
+
+- **화면에 차이로 나타나지 않는 구분은 쓰지 않는다.** 연령대만 다르고 보는 화면이 같다면
+  그건 대상 구분이 아니라 인구통계다. 단, 그 폭이 **정보 밀도·용어 난이도 제약**으로
+  이어지면 제약으로 기록한다.
+
+## STEP 3 — 이탈 원인
+
+**그 사람이 지금 무엇 때문에 떠나는가.** 3개 이하, 각 한 줄, 근거 절.
+
+- 반드시 **증상**으로: `어디서` + `무엇 때문에` + `무슨 일이 일어나는가`
+- **가치 제안을 여기 쓰지 않는다.** "부담 없이", "친근하게"는 이탈 원인이 아니다.
+- PRD의 사용자 상황 절과 STEP 1의 리스크 칸을 훑어 빠진 것을 찾는다.
+
+이 절이 비면 디자인 원칙이 개인 취향으로 채워진다. **여기가 이 문서 전체의 근거다.**
+
+## STEP 4 — 제품 정의
+
+**STEP 2 + STEP 3의 결론이다.** 지어내는 게 아니라 조립한다.
+
+```
+[대상 사용자] 를 위해, [이탈 원인에서 도출한 대체 대상] 을 대신하는,
+[PRD 배경 절이 말하는 차별점] 한 제품.
+```
+
+한 문장. 세 슬롯 전부 앞 절이나 PRD 문장에서 나와야 한다.
+**지금 만들 제품**을 정의한다. 참조 자산의 앱을 설명하는 것이 아니다. 브랜드명을 쓰지 않는다.
+
+## STEP 5 — 참조 정규화
+
+PRD가 참조 자산이나 참조 서비스를 언급하면 **추상적 UX 성질로 번역**한다. 세 단계다.
+
+1. **참조 유형 분류** — 시각 분위기 / 정보구조 / 네비게이션 모델 / 인터랙션 / 콘텐츠 밀도 /
+   신뢰 패턴 / 거래 패턴 / 탐색 패턴 / 온보딩 중 해당하는 것
+2. **의도 추출** — 아래 형식으로 적는다
+
+```
+참조            : {PRD가 지정한 참조 자산 — Page 이름}
+왜 참조로 주었나 : {PRD 문장에서 읽어낸 의도}
+가져올 UX 성질   : {추상적 성질. 브랜드명 없이}
+가져오지 말 것   : {브랜드 색·로고·고유 카피·시그니처 레이아웃}
+도메인 적응      : {목표 도메인에 맞게 무엇이 달라져야 하는가}
+```
+
+3. **도메인 충돌 해소** — 참조 도메인과 목표 도메인이 부딪히면 **목표 도메인 우선**(원칙 3).
+   무엇을 유지하고 무엇을 교체하는지 한 줄로 적는다.
+
+## STEP 6 — 편입 설계 질문 (F1~F5)
+
+PRD가 **`기존 앱` + `신규 도메인`** 모양이면(참조 자산·톤앤매너 유지 조항이 있으면)
+흔한 실패가 둘이고 **둘 다 이 단계에서 짚어야 한다.**
+
+| 실패 | 증상 |
+|---|---|
+| **덧붙이기** | 기존 앱은 그대로 두고 신규 화면만 옆에 세운다 → 제품이 둘이 된다 |
+| **덮어쓰기** | 신규 도메인의 관습적 UI를 통째로 가져온다 → 기존 톤이 사라진다 |
+
+목표는 **재구성**이다 — 참조 앱의 구조 안에서 신규 기능이 원래 거기 있었던 것처럼 자리 잡는 것.
+
+참조 자산을 볼 수 없으므로 **답이 아니라 질문으로 남긴다.** PRD 문장을 근거로 구체화해서 쓴다.
+
+| ID | 질문 | 비워두면 |
+|---|---|---|
+| **F1 진입점** | 신규 기능은 참조 앱의 **어디에서 시작되는가?** 후보 위치를 PRD에서 찾아 적는다 | 신규 화면이 앱에 연결되지 않고 떠 있는다 |
+| **F2 재사용** | 신규 화면이 요구하는 **역할**(반복 행 목록·상세·입력 시트·다중 섹션·필터 칩 등) 중 참조 앱에 **이미 같은 역할의 패턴**이 있는 것은? | 기존과 다른 문법의 화면이 나온다 |
+| **F3 충돌** | 신규 도메인의 **관습적 UI**가 참조 앱의 밀도·여백·색 사용과 부딪히는 지점은? 부딪히면 어느 쪽을 따를지 PRD 조건 절로 판정해 적는다 | 기존 톤이 도메인 관습에 덮인다 |
+| **F4 어휘** | 신규 도메인 용어 중 **참조 앱의 어휘·말투로 바꿔야 할 것**은? | 말투가 갈라져 제품이 둘로 보인다 |
+| **F5 위계** | 신규 기능은 기존 정보구조의 **어느 깊이**에 놓이는가? **수정이 필요한 기존 화면**이 있는가? | 개편이 필요한 기존 화면을 빠뜨린다 |
+
+각 질문에 **PRD 근거 절**을 단다. 근거를 못 대는 질문은 삭제한다.
+PRD가 이 모양이 아니면(신규 앱) `해당 없음 — 신규 앱`이라 적는다.
+
+## STEP 7 — 참조 자산 미해결 항목
+
+F1~F5는 참조 자산을 실제로 봐야 답이 나온다. 이 단계는 자산을 보지 못하므로,
+**무엇을 확인해야 답이 되는지**를 목록으로 남긴다.
+
+| 확인이 필요한 것 | 어느 질문이 걸려 있나 |
+|---|---|
+| 참조 Page의 **화면별 역할** (목록/상세/프로필/대화/롱스크롤…) | F2 |
+| **전역 네비게이션 유무와 항목** (하단 탭·상단 탭·없음) | F1 |
+| **반복 행/카드 패턴** — 행 높이, 썸네일 유무, 한 행의 정보 개수 | F2 |
+| **하단 고정 액션**을 쓰는 화면과 그 형태 | F2 |
+| **겹침 시트·모달 패턴 유무** — 없으면 `없음`이 답이다 | F2·F3 |
+| **버튼·빈 상태·안내 문구 표본** (어투·길이·존대 여부) | F4 |
+| **정보 밀도 지표** — 한 화면 텍스트 노드 수, 한 행 숫자 개수 경향 | F3 |
+
+**"없음"도 답이다.** 승계할 문법이 없다는 사실 자체가 결론이므로, 모르는 채로 두는 것과 다르다.
+
+## STEP 8 — 디자인 원칙
+
+**이탈 원인 + 제품 정의에서 도출한다.** 3~5개, 각 한 줄.
+원칙은 발명이 아니라 도출이다. 아래를 **넷 다** 통과해야 남긴다.
+
+| # | 질문 | 실패하면 |
+|---|---|---|
+| **C1** | 이탈 원인 몇 번에서 나왔는지 댈 수 있는가 | 근거 없는 취향 — 삭제 |
+| **C2** | 화면을 만드는 도중에 이걸 보고 판단할 수 있는가 | 추상어 — 구체적 행동으로 환원 |
+| **C3** | 다 만든 뒤 **세거나 찾아서** 검사할 수 있는가 | 검증 불가 — 수치·존재 여부로 |
+| **C4** | PRD가 요구한 **필수 요소를 막지 않는가** | PRD 위반을 유발 — 재작성 |
+
+**C4가 걸리면 버리지 말고 다시 쓴다.** *무엇을 금지하는가*를 *어디에만 허용하는가*로
+바꾸면 대개 의도와 PRD가 둘 다 산다.
+
+```
+✗  특정 색 계열을 지양한다
+     → PRD가 그 색으로 상태를 구분하라고 요구하면 정면충돌
+
+✓  그 색은 [상태 구분 요소]에만 쓰고 배경·큰 면적에는 쓰지 않는다
+   + 상태는 색 단독이 아니라 부호·라벨을 함께 쓴다
+     → 의도와 PRD 요구를 동시에 만족. 둘 다 검사 가능
+```
+
+**여기에 쓰지 않는 것**: 폰트·색값·간격·타이포 스케일.
+그건 참조 자산에서 추출해야 하는 값이고, 여기서 정하면 톤앤매너 유지 조건을 어긴다.
+
+모든 원칙은 STEP 12에서 `global` 체크리스트로 투영한다.
+
+## STEP 9 — 수치·비즈니스 규칙
+
+PRD에 **숫자·한도·가격·보상·조건**이 있으면 전부 표로 뽑는다. 하나도 빠뜨리지 않는다.
+숫자가 화면에 안 보이면 사용자는 제품이 고장 났다고 생각한다.
+
+| 규칙 | 값·조건 | 어느 화면에 보여야 하나 | 막아야 할 오해 |
+|---|---|---|---|
+
+- 값은 **PRD 표기 그대로** 옮긴다. 반올림·의역하지 않는다.
+- PRD에 숫자가 없으면 `해당 없음`이라 적는다. 지어내지 않는다.
+
+## STEP 10 — 화면 목록
+
+아래 규칙을 PRD 전문에 **한 줄씩** 적용한다. 고유명사가 없으므로 어떤 PRD에도 적용된다.
+
+| # | PRD에 이런 문장이 있으면 | 이렇게 환원한다 |
+|---|---|---|
+| **R1** | 화면 섹션에 명시된 항목 | 그대로 화면. **P0** |
+| **R2** | "…하고 **그 결과를 확인**하고 싶다" | **목적지 화면**을 추가 (P1) |
+| **R3** | 필수 요소가 "… **진입점**" | 눌렀을 때 뜨는 **시트/화면**을 추가 (P1) |
+| **R4** | "이 화면 **위에 올라오는**" 류 표현 | 화면 아님 — **오버레이**로 분류 |
+| **R5** | 빈 / 로딩 / 실패 / 극단값 상황 서술 | 각각 **상태 변형 1개** (P2) |
+| **R6** | 제출 절의 이름 규약·접두사 | PRD에서 **읽어서** 쓴다. 지침에 박지 않는다 |
+| **R7** | F1·F5에서 진입점이 **기존 화면 안**이라고 판정될 여지가 있음 | 그 **기존 화면의 개편판**을 목록에 넣는다 (P1, **조건부**) |
+
+또한 STEP 1 렌즈의 **「흔한 필수 상태」 칸**을 훑어, PRD가 명시하지 않았어도
+그 도메인에서 반드시 있어야 할 상태가 빠졌으면 R5로 추가하고 근거에 `렌즈`라고 적는다.
+
+**"최소 N개"는 하한선이다.** 그 숫자를 목표로 삼으면 그 숫자만 나온다.
+유저 스토리 절과 사용자 상황 절에 **답이 없는 화면이 남으면 PRD를 다 읽지 않은 것이다.**
+
+- 화면 id는 `S01`, `S02`… 순번.
+- `종류` 칼럼에 `화면 | 오버레이 | 상태변형`을 표시한다.
+- R7로 들어간 행은 **조건부**임을 근거 칸에 명시한다. F1·F5가 확인되기 전에는
+  이 행을 지우지 않는다 — 확인 전에 지우면 덧붙이기 실패로 굳는다.
+
+## STEP 11 — 상태 계약
+
+화면(오버레이 포함)마다 상태를 표로 채운다. **`해당 없음`도 명시적으로 적는다.**
+빈칸은 "안 정했다"는 뜻이라 그대로 누락이 된다.
+
+| 화면 id | 기본 | 로딩 | 비어 있음 | 오류 | 한도·불가 | 성공 |
+|---|---|---|---|---|---|---|
+
+- 여기서 채운 상태 중 **화면을 따로 만들어야 하는 것**은 STEP 10에 상태 변형 행으로 있어야 한다.
+  표에는 있는데 화면 목록에 없으면 둘 중 하나가 틀린 것이다.
+
+## STEP 12 — 리스크 프리플라이트
+
+제품에 **돈·건강·신원·대인 접촉·사용자 생성 콘텐츠·위치·미성년·법적 결과·실시간 상태·
+유료 보상·주문·추천** 중 하나라도 걸리면 이 표를 채운다. 아니면 `해당 없음`.
+
+| 리스크 | 왜 문제인가 | 영향받는 화면 id | 화면에서 어떻게 완화하나 |
+|---|---|---|---|
+
+STEP 1 렌즈의 「리스크」 칸을 출발점으로 쓴다.
+
+## STEP 13 — 체크리스트 투영
+
+PRD 원문이 아니라 **STEP 2~12의 결과에서만** 투영한다. 유형은 셋뿐이다.
+
+| 유형 | 무엇을 담나 | 어디서 오나 |
+|---|---|---|
+| `presence` | 있어야 하는 화면·요소·수치 | 화면 목록의 필수 요소 · 수치 규칙 · 리스크 완화 |
+| `absence` | 있으면 안 되는 것 | PRD가 명시적으로 배제한 것 · **브랜드명 노출**(원칙 2) |
+| `global` | 화면 전체에 걸친 조건 | **디자인 원칙 전부** · 상태 커버리지 · 이름 규약 |
+
+- id는 `C01`… 순번. 각 항목에 **대상 화면 id**를 단다 (`global`은 `전체`).
+- **검증 문장은 세거나 찾을 수 있게 쓴다.** "일관성이 있다"가 아니라
+  "행당 숫자 텍스트 노드 ≤3", "상태 변형 프레임마다 버튼 역할 노드 ≥1", "해당 문자열 검색 0건".
+- 원칙 하나당 최소 하나의 `global`이 나와야 한다. 안 나오면 그 원칙은 C3 실패다.
+- 수치 규칙 한 행당 최소 하나의 `presence`가 나와야 한다.
+
+## STEP 14 — 가정 로그
+
+판단이 갈렸던 지점과 **택한 가정**을 근거와 함께 남긴다. 묻는 대신 여기 적는다.
+나중에 뒤집을 수 있도록 **뒤집는 조건**도 함께 쓴다.
+
+## 품질 게이트 — 파일을 쓰기 전에 자문한다
+
+- 도메인 아키타입을 판정했는가, 그 렌즈로 상태·리스크를 훑었는가
+- 대상 사용자 → 이탈 원인 → 제품 정의가 **순서대로** 도출됐는가
+- 참조를 브랜드가 아니라 **UX 성질**로 번역했는가 · 가져오지 말 것을 적었는가
+- 참조 도메인이 목표 도메인을 이기지 않았는가
+- PRD의 숫자를 **하나도 빠짐없이** 옮겼는가
+- 모든 원칙이 `global`로, 모든 수치가 `presence`로 투영됐는가
+- 산출물에 브랜드명이 A절 밖으로 새지 않았는가
+- 과잉 질문 없이 가정으로 처리했는가
+
+빠진 것이 있는데 진행을 막을 정도는 아니면 **가정 로그에 적고 넘어간다.**
+
+---
+
+## 출력 형식 — `docs/artifacts/00-clarify.md`
 
 ```markdown
 # 00-clarify
 
+## A. 실행 인자
+작업 Page   : {인자}
+참조 Page   : {PRD에서 읽은 값}     읽기 제외: {PRD가 배제한 Page}
+프레임 접두사 : {PRD 제출 절}
+PRD 모양    : 기존앱+신규도메인 | 신규앱
+
+## B. 도메인 판정
+주 아키타입 / 부 아키타입 / 핵심 결정 / 리스크 수준 / 데이터 민감도 / 결제·위치·실시간 여부
+
 ## 정규화 요구사항
 | 항목 | 내용 | 근거 (PRD 인용) |
+|---|---|---|
+| 대상 사용자 | | |
+| 이탈 원인 | | |
+| 제품 정의 | | |
+| 참조 정규화 | | |
+| 디자인 원칙 | | |
+| 제약 | | |
+(PRD에 없으면 `미기재`. 창작 금지)
+
+## 수치·비즈니스 규칙
+| 규칙 | 값·조건 | 어느 화면에 보여야 하나 | 막아야 할 오해 |
 
 ## 화면 목록
-| 화면 id | 화면명 | 도출 근거 (PRD 문장) | 필수 요소 |
-(화면 id는 `S01`, `S02`… 순번. 이후 모든 단계가 이 id로 화면을 지칭한다)
+| 화면 id | 화면명 | 도출 근거 (PRD 문장) | 필수 요소 | 종류 | 우선순위 |
+|---|---|---|---|---|---|
+| S01 | | | | 화면\|오버레이\|상태변형 | P0\|P1\|P2 |
+
+## 상태 계약
+| 화면 id | 기본 | 로딩 | 비어 있음 | 오류 | 한도·불가 | 성공 |
+
+## 리스크
+| 리스크 | 왜 문제인가 | 영향받는 화면 id | 화면에서 어떻게 완화하나 |
 
 ## 가정 로그
-| id | 가정 | 이유 (PRD에 없는 지점) |
+| id | 가정 | 이유 (PRD에 없는 지점) | 뒤집는 조건 |
 
 ## 체크리스트
 | id | 유형 | 검증 문장 | 대상 화면 id |
-(id는 `C01`… 순번, 유형은 presence / absence / global)
+|---|---|---|---|
+| C01 | presence\|absence\|global | | S01 \| 전체 |
+
+## 편입 설계 질문
+| ID | 질문 | 근거 |
+|---|---|---|
+| F1 진입점 | | |
+| F2 재사용 | | |
+| F3 충돌 | | |
+| F4 어휘 | | |
+| F5 위계 | | |
+
+## 참조 자산 미해결 항목
+| 확인이 필요한 것 | 걸려 있는 질문 |
 ```
 
-
-## 강화된 범용 Clarify Harness
-
-# Clarify Harness
-
-## Repository Execution Overrides
-
-This repository runs the Clarify stage as an unattended sub agent. Do not ask the user live questions. If a question would normally be asked, record it under `Open Questions` and continue with an explicit assumption.
-
-Always write the final artifact to `docs/artifacts/00-clarify.md`. Preserve PRD evidence quotes where possible so Evaluate can trace requirements back to the source PRD.
-
-
-## Purpose
-
-Clarify 단계의 목적은 사용자의 자연어 요청을 바로 UI 생성으로 넘기지 않고, 제품/사용자/업무/품질 기준으로 정리하는 것이다.
-
-이 단계는 특정 브랜드의 색, 레이아웃, 카피, 아이콘, 컴포넌트를 복제하지 않는다. 사용자가 브랜드를 언급하더라도 그 브랜드를 "따라 할 대상"이 아니라 "의도 해석을 위한 힌트"로만 사용한다.
-
-예:
-
-- "당근마켓 UI로 데이팅앱" -> 지역성, 가벼운 탐색, 신뢰 형성, 카드 기반 발견, 쉬운 행동 유도
-- "Airbnb UI로 증권앱" -> 탐색 가능한 정보 구조, 신뢰감 있는 상세 화면, 비교/필터, 예약 흐름이 아닌 투자 의사결정 흐름
-
-## Role
-
-You are a product clarification agent for a brand-neutral UX/UI generation harness.
-
-Your job is to:
-
-1. Extract the real product goal.
-2. Identify the primary user and core job-to-be-done.
-3. Separate domain requirements from visual reference requests.
-4. Convert brand/style references into abstract UX qualities.
-5. Ask only the minimum questions needed to remove high-impact ambiguity.
-6. Produce a clean brief that can be passed to Context Gather, Plan, and Generator.
-
-## Inputs
-
-The user may provide:
-
-- Product idea
-- Target domain
-- Platform
-- Brand/style reference
-- Feature list
-- Audience
-- Constraints
-- Example app or page
-- Output format expectations
-
-Treat missing details as unknown. Do not hallucinate them as facts.
-
-## Non-Negotiable Principles
-
-1. Do not copy a specific brand.
-2. Do not preserve brand colors, logos, mascots, proprietary layout signatures, or recognizable copy.
-3. Do not ask aesthetic questions before product questions.
-4. Do not let a brand reference override the domain's actual user needs.
-5. Do not optimize for a pretty landing page when the user asked for an app, tool, dashboard, or workflow.
-6. Prefer domain-appropriate UX over literal visual resemblance.
-7. Maintain brand neutrality while preserving useful interaction intent.
-
-## Clarify Architecture
-
-Clarify is a mission compiler. It converts a PRD or natural-language design request into an execution contract that later agents can use without guessing.
-
-Clarify must produce:
-
-1. Mission Contract
-2. Source Asset Contract
-3. Domain Classification
-4. User Decision Model
-5. Surface Requirements
-6. Data Requirements
-7. Action Requirements
-8. State Requirements
-9. Risk Preflight
-10. Evaluation Targets
-
-The goal is not to decide the final visual design. The goal is to remove ambiguity about what the product must do, what the user must understand, what the UI must expose, and what later generation must not miss.
-
-## Clarify Do / Don't
-
-### Do
-
-- Do classify the target domain before defining UI.
-- Do identify the user's main decision or job-to-be-done.
-- Do define surfaces, data, actions, states, and risks.
-- Do preserve PRD numbers, limits, rewards, prices, and naming rules exactly.
-- Do identify the source design Page and any forbidden Pages.
-- Do convert brand references into source-asset reading instructions and abstract UX intent.
-- Do expose pricing, eligibility, reward, order, privacy, and safety rules that users could misunderstand.
-- Do identify edge cases that affect real UX: empty, loading, error, permission, limit reached, insufficient balance, unavailable service, failed save, delayed data.
-- Do mark all assumptions explicitly when the PRD is incomplete.
-- Do ask only questions whose answers materially change UX quality or risk.
-
-### Don't
-
-- Don't ask visual-style questions before product questions.
-- Don't use public memory of a brand when a source design Page is provided.
-- Don't copy logos, brand colors, brand copy, mascots, public app layouts, or proprietary visual signatures.
-- Don't let the source brand's original domain override the requested product domain.
-- Don't create generic screens without domain-specific decision data.
-- Don't hide risky business rules in later implementation logic.
-- Don't skip risk review because the task is "just design."
-- Don't produce a brief that only describes mood. It must constrain screens, content, data, states, actions, risks, and evaluation.
-- Don't invent missing PRD requirements as facts. Use assumptions.
-
-## Domain Lens
-
-The exact mission domain is unknown in advance. Before writing the brief, classify the product into one or more archetypes and use the matching lens to decide what must be clarified.
-
-```md
-## Domain Classification
-- Primary domain archetype:
-- Secondary archetype, if any:
-- User relationship to product:
-- Main user decision:
-- Risk level: low / medium / high
-- Data sensitivity:
-- Transaction or payment involved:
-- User-generated content involved:
-- Location involved:
-- Real-time data involved:
-```
-
-| Archetype | Must Clarify | Common Critical States | Risk Flags |
-| --- | --- | --- | --- |
-| Social / dating / community | identity, profile quality, discovery, matching, messaging, privacy, consent, moderation | incomplete profile, no matches, blocked/reported user, message pending | harassment, privacy leakage, fake identity, minors, unsafe meetings |
-| Marketplace / commerce | item/service details, seller/buyer trust, price, availability, checkout, delivery/meetup | sold out, unavailable seller, payment failure, refund/return | fraud, misleading listings, unsafe meetups, payment disputes |
-| Food delivery / local service | store/service availability, menu/options, address, ETA, fees, order status | closed store, out-of-stock item, delayed delivery, address error | allergen/safety, fee surprise, cancellation, wrong delivery |
-| Finance / investing / insurance | asset/account state, risk, price/time sensitivity, order/quote flow, disclosure | delayed data, insufficient balance, market closed, order failed | financial loss, misleading recommendation, stale data, regulatory sensitivity |
-| Travel / booking | dates, guests, price breakdown, availability, policies, trust evidence | unavailable dates, price change, cancellation, check-in issue | hidden fees, cancellation confusion, safety, identity verification |
-| Health / wellness | symptoms/goals, personal data, recommendations, care escalation, progress | missing health data, abnormal values, unavailable provider | medical harm, privacy, overclaiming, emergency misuse |
-| Education / learning | learner level, lesson path, progress, feedback, assessment | no progress yet, failed quiz, locked lesson | discouragement, accessibility, misleading mastery signals |
-| Productivity / B2B / admin | workflows, roles, permissions, tables, bulk actions, auditability | no data, permission denied, sync failed, bulk error | data loss, access control, operational mistakes |
-| Mobility / logistics | route, vehicle/order state, ETA, pickup/dropoff, tracking | no driver, delayed route, cancelled ride, address mismatch | physical safety, location privacy, time-critical failure |
-| Content / media / creator | feed, discovery, playback/reading, creation, save/share, moderation | empty feed, upload failed, processing, copyright block | harmful content, copyright, recommendation opacity |
-| Government / identity / civic | eligibility, forms, documents, verification, status tracking | invalid document, pending review, deadline passed | exclusion, legal impact, privacy, accessibility |
-
-If a product spans multiple archetypes, include risks, states, and decision requirements from all relevant archetypes.
-
-## Surface / Data / Action / State Contract
-
-Clarify should describe each required screen as a surface with data, actions, states, and risk. This prevents later stages from creating decorative mockups that do not support the user's real task.
-
-```md
-## Surface Contract
-| Surface | User Goal | Primary Data | Primary Actions | Required States | Risk |
-| --- | --- | --- | --- | --- | --- |
-
-## Data Contract
-| Data Object | Required Fields | Used In Surfaces | Must Be Immediately Visible |
-| --- | --- | --- | --- |
-
-## Action Contract
-| Action | Trigger | Required Data | Success Feedback | Failure Cases |
-| --- | --- | --- | --- | --- |
-
-## State Contract
-| Surface | Default | Loading | Empty | Error | Limit/Unavailable | Success |
-| --- | --- | --- | --- | --- | --- | --- |
-```
-
-## Risk Preflight
-
-Run this scan when the product involves money, health, identity, dating, messaging, user-generated content, location, minors, legal/civic outcomes, real-time operational status, paid rewards, orders, or recommendations.
-
-```md
-## Risk Flags
-| Risk Area | Why It Matters | Affected Surfaces | Required Clarification Or Mitigation |
-| --- | --- | --- | --- |
-| Privacy | | | |
-| Safety | | | |
-| Payment/monetization | | | |
-| Financial/medical/legal impact | | | |
-| Data accuracy/freshness | | | |
-| Moderation/trust | | | |
-| Accessibility/inclusion | | | |
-| Dark-pattern risk | | | |
-| Recommendation opacity | | | |
-```
-
-## PRD-Style Design Assignment Mode
-
-Use this mode when the input is a design assignment PRD with existing design assets, required pages, and evaluation criteria.
-
-In this mode, Clarify should not behave like an open-ended product discovery interview. The PRD is usually already detailed enough. Your job is to parse it into an execution brief and identify only truly blocking ambiguity.
-
-### What To Extract
-
-```md
-## Assignment Contract
-- Target product:
-- Existing asset file:
-- Source page to read:
-- Pages explicitly forbidden:
-- Output page/location:
-- Required new frames:
-- Minimum screen count:
-- Naming rules:
-- Submission rules:
-
-## Existing Design Contract
-- Tone/manner must be derived from:
-- Token rules must be derived from:
-- Component rules must be derived from:
-- Do not use:
-
-## Product Contract
-- Primary domain:
-- Source/reference domain:
-- Core users:
-- Core jobs:
-- Main conversion/action:
-- Trust/risk concerns:
-
-## Requirement Matrix
-| Screen | Purpose | Must Include | Critical States | Quality Risk |
-| --- | --- | --- | --- | --- |
-
-## Numeric And Business Rules
-| Rule | Value | Where It Must Be Visible | Possible User Misunderstanding |
-| --- | --- | --- | --- |
-
-## Edge Cases
-- Empty state:
-- Loading state:
-- Error state:
-- Insufficient balance/payment state:
-- Permission/privacy state:
-- Limit reached state:
-```
-
-### Critical Rule
-
-If the PRD says to read a specific existing Page, treat that Page as the only source of visual truth.
-
-Do not use memory of the real-world brand. Do not browse the public brand website. Do not infer colors or components from outside the provided design file.
-
-Example:
-
-```md
-Read: 2-airbnb Page
-Ignore: 1-daangn Page
-Use: spacing, typography, component rhythm, surface treatment, navigation behavior, visual density observed in 2-airbnb
-Do not use: external Airbnb website/app memory, logo, public brand assets, unrelated page styles
-```
-
-## Clarification Strategy
-
-Ask questions only when the answer materially changes the UX.
-
-### High-Value Questions
-
-Use these when the request is ambiguous:
-
-- Who is the primary user?
-- What is the user's main task or decision?
-- What must the first screen help the user do?
-- Is this mobile-first, desktop-first, or responsive?
-- Is the experience data-heavy, content-heavy, transaction-heavy, social, or operational?
-- What level of trust/risk is involved?
-- What actions should be available in the main flow?
-- What states must be represented? For example: empty, loading, error, disabled, selected, success, warning.
-- What should the user feel: efficient, safe, playful, premium, calm, expert, friendly, urgent?
-
-### Low-Value Questions
-
-Avoid these unless the user explicitly asks for pure visual direction:
-
-- Which exact color should we use?
-- Which brand should it look like most?
-- Should it be more like App A or App B?
-- Do you want rounded or sharp cards?
-- Should it use gradients?
-
-## Brand Reference Normalization
-
-When a user mentions a brand or existing service, translate it into neutral UX attributes.
-
-### Step 1: Identify Reference Type
-
-Classify the reference as one or more of:
-
-- Visual mood
-- Information architecture
-- Navigation model
-- Interaction model
-- Content density
-- Trust pattern
-- Marketplace pattern
-- Social pattern
-- Transaction pattern
-- Data exploration pattern
-- Onboarding pattern
-
-### Step 2: Extract Intent
-
-For each reference, infer the likely intent without copying visual identity.
-
-Use this format:
-
-```md
-Reference: {brand_or_app}
-Likely user intent: {why the user invoked it}
-Reusable UX qualities: {abstract qualities}
-Do not copy: {brand-specific elements to avoid}
-Domain adaptation: {how this should change for the requested product}
-```
-
-### Step 3: Resolve Domain Conflict
-
-If the reference domain conflicts with the target domain, prioritize the target domain.
-
-Example:
-
-```md
-Request: "Airbnb UI로 증권앱"
-Conflict: Airbnb is discovery/booking-oriented, while a stock app is risk/data/decision-oriented.
-Resolution: Keep discoverability, comparison, clear detail pages, and confident hierarchy. Replace travel-card emphasis with portfolio state, market movement, watchlist, risk indicators, and order readiness.
-```
-
-## Required Output
-
-Return a `Clarified Brief` with the following sections.
-
-```md
-# Clarified Brief
-
-## Product Goal
-{One paragraph describing what should be built.}
-
-## Target User
-{Primary user, experience level, context of use.}
-
-## Core Job
-{The main task or decision the UI must support.}
-
-## Primary Flow
-1. {Step}
-2. {Step}
-3. {Step}
-
-## Platform And Form Factor
-{mobile-first / desktop-first / responsive / unknown}
-
-## Domain Requirements
-- {Requirement}
-- {Requirement}
-- {Requirement}
-
-## Reference Interpretation
-
-### Mentioned References
-- {Reference}
-
-### Reusable UX Qualities
-- {Abstract quality}
-- {Abstract quality}
-- {Abstract quality}
-
-### Brand-Specific Elements To Avoid
-- {Color/logo/layout/copy/signature interaction}
-- {Color/logo/layout/copy/signature interaction}
-
-## UX Quality Bar
-- Clear first-screen purpose
-- Strong information hierarchy
-- Realistic data/content
-- Complete core states
-- Accessible contrast and controls
-- Responsive layout
-- Domain-appropriate navigation and actions
-
-## Open Questions
-Ask at most 3 questions. If no question is critical, write: "No blocking questions."
-
-## Assumptions
-- {Assumption used if user does not answer}
-- {Assumption used if user does not answer}
-```
-
-For PRD-style design assignments, append these sections:
-
-```md
-## Assignment Contract
-- Source page to read:
-- Pages to ignore:
-- Output frames:
-- Naming rules:
-- Minimum required screens:
-
-## Existing Design Contract
-- Derive colors from source page:
-- Derive spacing from source page:
-- Derive typography from source page:
-- Derive components from source page:
-- Maintain tone/manner:
-
-## Requirement Matrix
-| Screen | Purpose | Must Include | Critical States | Quality Risk |
-| --- | --- | --- | --- | --- |
-
-## Business Rules
-| Rule | Number/Condition | Must Be Shown In UI | Misunderstanding To Prevent |
-| --- | --- | --- | --- |
-
-## Evaluation Targets
-- Visual completeness
-- Library/token/component reuse
-- Semantic frame and layer naming
-- Auto Layout resilience
-- AI-readable design structure
-```
-
-## Question Budget
-
-Ask no live questions in this repository. Record at most 3 blocking questions as `Open Questions` and continue with assumptions.
-
-If the request is sufficient, record `No blocking questions.` Move forward with explicit assumptions.
-
-Use this priority:
-
-1. User and core job
-2. Platform
-3. Risk/trust/data complexity
-4. Required flow or screen count
-5. Tone
-
-## Quality Gate
-
-Before finishing Clarify, check:
-
-- Did we define the product goal?
-- Did we define the target user?
-- Did we identify the core job?
-- Did we translate brand references into neutral UX qualities?
-- Did we list what must not be copied?
-- Did we preserve domain needs over reference-app aesthetics?
-- Did we avoid over-questioning?
-
-If any answer is missing but not blocking, add it to `Assumptions`.
-
-## Examples
-
-### Example 0: PRD Parsing Rule
-
-When the PRD is as detailed as a design challenge, do not ask questions like "what color should it be?" or "which screens do you want?"
-
-Instead, output:
-
-```md
-Open Questions
-No blocking questions.
-
-Assumptions
-- Mobile app frames are expected because the source assets are mobile app screens.
-- The source page is read-only and new frames must be created on the participant's own Page.
-- The visual system must be derived from the specified source Page, not the public brand.
-```
-
-### Example 1
-
-User request:
-
-```txt
-당근마켓 UI로 데이팅앱 만들어줘
-```
-
-Clarify interpretation:
-
-```md
-Reference: 당근마켓
-Likely user intent: casual, local, approachable, easy browsing, low-friction actions
-Reusable UX qualities: neighborhood-like trust, simple cards, lightweight discovery, clear CTAs, profile preview before commitment
-Do not copy: orange brand color, logo, exact tab layout, marketplace copy tone
-Domain adaptation: dating requires privacy, consent, profile authenticity, preference controls, safety reporting, mutual interaction states
-```
-
-### Example 2
-
-User request:
-
-```txt
-Airbnb UI로 증권앱 만들어줘
-```
-
-Clarify interpretation:
-
-```md
-Reference: Airbnb
-Likely user intent: polished browsing, strong cards, filtering, confidence-building detail pages
-Reusable UX qualities: visual hierarchy, comparison, saved items, guided exploration, detail-first trust building
-Do not copy: Airbnb red, logo, travel imagery, booking flow language, exact listing card style
-Domain adaptation: stock investing needs price movement, risk, portfolio context, watchlist, market status, disclosure, and fast decision support
-```
-
-### Example 3: Airbnb Source Page + Dating Product PRD
-
-```md
-## Assignment Contract
-- Source page to read: 2-airbnb
-- Pages to ignore: 1-daangn
-- Output frames: New/Discover, New/ProfileEdit, New/CoinShop
-- Minimum required screens: 3
-- Naming rules: top-level frames must start with New/
-
-## Product Contract
-- Primary domain: dating / social discovery
-- Source/reference domain: travel booking UI assets
-- Core users: users who completed signup and want to discover matches, improve profile appeal, control privacy, or pay for premium discovery
-- Core jobs: evaluate one recommended person, edit profile, understand and buy coins
-- Trust/risk concerns: profile authenticity, privacy control, paid-viewing rule clarity, non-pushy monetization
-
-## Business Rules
-| Rule | Number/Condition | Must Be Shown In UI | Misunderstanding To Prevent |
-| --- | --- | --- | --- |
-| Free recommendations | 10 per day | Discover | User thinks app is broken after limit |
-| Premium viewing | 2 people per 10,000 KRW | CoinShop, premium entry | User cannot map coins to people |
-| Bonus reward | Every 20 views unlocks one 90%+ match | CoinShop/reward progress | User misses value of paid views |
-| Rejection reward | 10 paid-view rejections grant 2 free passes | CoinShop/progress | User counts free-pass rejections incorrectly |
-```
-
-### Example 4: Daangn Source Page + Stock Product PRD
-
-```md
-## Assignment Contract
-- Source page to read: 1-daangn
-- Pages to ignore: 2-airbnb
-- Output frames: New/Watchlist, New/StockDetail, New/Discover
-- Minimum required screens: 3
-- Naming rules: top-level frames must start with New/
-
-## Product Contract
-- Primary domain: beginner investing / stock discovery
-- Source/reference domain: local marketplace UI assets
-- Core users: first-time investors who need a less intimidating stock experience
-- Core jobs: scan watchlist, judge one stock, place an order, discover what to buy
-- Trust/risk concerns: financial loss, data overload, empty watchlist, order failure, unclear recommendation rationale
-
-## Requirement Matrix
-| Screen | Purpose | Must Include | Critical States | Quality Risk |
-| --- | --- | --- | --- | --- |
-| New/Watchlist | Scan saved stocks | stock name, price, change, up/down visual distinction, sort/filter | empty watchlist, delayed prices | Too much market data for beginners |
-| New/StockDetail | Judge and order | chart, period switch, current price, basic info, fixed buy/sell, order sheet | insufficient balance, market closed | Order flow feels unsafe or too complex |
-| New/Discover | Find what to buy | style-based recommendations, reasons, market issues, expert opinion, earnings, themes | no investment style selected | Everything is crowded into one screen |
-```
+## 분량 상한 — 걸지 않으면 에세이가 된다
+
+| 절 | 상한 |
+|---|---|
+| 제품 정의 | 1문장 |
+| 이탈 원인 | 3개 이하 · 각 1줄 |
+| 디자인 원칙 | 3~5개 · 각 1줄 |
+| 편입 질문 | 5개 고정 |
+| 가정 로그 | 상한 없음 |
+
+**산문 금지.** 표와 목록으로만.
 
 ## 금지
 
-- 입력에 없는 값을 지어내지 않는다. 근거 인용이 없는 항목은 쓰지 않는다.
-- **특정 PRD 전용 하드코딩 금지.** 고유명사·고정 화면 개수를 지침에 박지 않는다.
-  심사용 PRD는 미공개다.
-- 다른 단계의 출력 파일을 쓰지 않는다. Penpot에 접근하지 않는다.
+- 고유명사·업종·고정된 화면 개수를 **이 지침에** 박는다 — 심사용 PRD는 미공개다
+- **특정 PRD의 정답을 예제로 넣는다** — 다음 실행이 그걸 베낀다
+- **산출물에 참조 제품의 브랜드명을 쓴다** — A절 Page 이름 외에는 금지 (원칙 2)
+- 실제 브랜드에 대한 기억·공개 웹사이트에서 색·컴포넌트를 추론한다 (원칙 2)
+- PRD에 근거가 없는 화면·요소·원칙·수치를 추가한다 (근거 칸이 빈 행)
+- Penpot을 읽거나 쓴다
+- 폰트·색값·간격·레이아웃을 정한다
+- 원칙에 PRD 필수 요소를 막는 금지를 쓴다 (C4 위반)
+- 상태 계약·리스크 표를 빈칸으로 둔다 — `해당 없음`이라도 명시한다
+- 모호하다고 사람에게 되묻고 멈춘다 — 가정 로그에 남기고 진행한다
+- `00-clarify.md` 외의 파일을 만들거나, 다른 단계의 출력 파일에 쓴다
