@@ -30,7 +30,7 @@ description: PRD를 입력받아 단계별 sub agent를 순서대로 호출해 P
 | # | 단계 | sub agent | 입력 | 출력 | 담당자 | 병렬 가능 |
 |---|---|---|---|---|---|---|
 | 1 | Clarify | `stage-1-clarify` | PRD | `docs/artifacts/00-clarify.md` | 미정 | ✅ (2와) |
-| 2 | Context Gather | `stage-2-context` | Page 이름, Penpot(읽기) | `docs/artifacts/01-context.json` | 미정 | ✅ (1과) |
+| 2 | Context Gather | `stage-2-contex` | Page 이름, Penpot(읽기) | `docs/artifacts/01-context.json` | 미정 | ✅ (1과) |
 | 3 | Plan | `stage-3-plan` | 00, 01 (+재진입 시 gap) | `docs/artifacts/02-plan/` (tokens·components·layouts) | 미정 | — |
 | 4 | Generate: Library | `stage-4-generate-library` | 02-plan, Page 이름 | Penpot 컴포넌트 + `docs/artifacts/03-library-log.json` | 미정 | — (Penpot 쓰기 직렬) |
 | 5 | Generate: Screens | `stage-5-generate-screens` | 02-plan/layouts, 03, Page 이름 (+gap) | Penpot board + `docs/artifacts/04-screens-log.json` | 미정 | — (Penpot 쓰기 직렬) |
@@ -41,7 +41,7 @@ description: PRD를 입력받아 단계별 sub agent를 순서대로 호출해 P
 
 ```
 0. 게이트: 작업 Page 이름 확정 (없으면 묻고 대기. 시작하지 않는다)
-1. stage-1-clarify ∥ stage-2-context   (병렬 — 서로 의존 없음)
+1. stage-1-clarify ∥ stage-2-contex   (병렬 — 서로 의존 없음)
    → 00-clarify.md, 01-context.json 생성 확인
 2. stage-3-plan → 02-plan/ 생성 확인 (layouts가 화면 목록 수만큼 있는지)
 3. stage-4-generate-library → 03-library-log.json 확인   (직렬)
